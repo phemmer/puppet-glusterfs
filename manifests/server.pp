@@ -41,9 +41,9 @@ define glusterfs::server::peer (
 }
 
 define glusterfs::server::brick (
-  $volume,
-  $host = $ipaddress,
-  $path,
+  $volume, # name of the Glusterfs::Server::Volume this brick belongs to
+  $host = $::ipaddress, # hostname/ip of the node serving the brick
+  $path, # path to the brick # this is not the $name because the resource is collected, and thus the name must be unique
 ) {
 }
 

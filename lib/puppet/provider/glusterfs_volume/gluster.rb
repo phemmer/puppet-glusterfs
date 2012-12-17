@@ -20,7 +20,7 @@ Puppet::Type.type(:glusterfs_volume).provide(:gluster) do
 		volume_hashes = []
 		volume_hash = nil
 		Puppet.debug "Glusterfs_volume: Executing `gluster volume info #{name}`"
-		%x{gluster volume info #{name}}.split(/\n/).each do |line|
+		%x{gluster volume info #{name} 2>/dev/null}.split(/\n/).each do |line|
 			if /^Volume Name: (.+)/.match(line) then
 				volume_hash = {}
 				volume_hashes.push(volume_hash)
@@ -123,7 +123,7 @@ Puppet::Type.type(:glusterfs_volume).provide(:gluster) do
 		cmd.concat(resource[:bricks])
 		
 		Puppet.debug "Glusterfs_volume: Executing `#{cmd.join(' ')}`"
-		cmdout = %x{#{cmd.join(' ')} 2>&1} # we have to do an ugly shell redirecto because Open3#popen3 doesnt provide exit status
+		cmdout = %x{#{cmd.join(' ')} 2>&1} # we have to do an ugly shell redirect because Open3#popen3 doesnt provide exit status
 		cmdstatus = $?
 
 		if cmdstatus != 0 then
