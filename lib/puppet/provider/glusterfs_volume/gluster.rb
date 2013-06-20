@@ -221,8 +221,8 @@ Puppet::Type.type(:glusterfs_volume).provide(:gluster) do
 		bricks_extra = self.bricks - bricks_new
 
 		if bricks_missing.length > 0 then
-			Puppet.debug "Glusterfs_volume: Executing `gluster volume add-brick #{resource[:name]} #{bricks_missing}`"
-			cmdout = %x{gluster volume add-brick #{resource[:name]} #{bricks_missing} 2>&1}
+			Puppet.debug "Glusterfs_volume: Executing `gluster volume add-brick #{resource[:name]} '#{bricks_missing.join("' '")}'`"
+			cmdout = %x{gluster volume add-brick #{resource[:name]} '#{bricks_missing.join("' '")}' 2>&1}
 			cmdstatus = $?
 
 			if cmdstatus != 0 then
@@ -236,7 +236,8 @@ Puppet::Type.type(:glusterfs_volume).provide(:gluster) do
 			while bricks_missing.length > 0 and bricks_extra.length > 0 do
 				brick_old = bricks_extra.shift
 				brick_new = bricks_missing.shift
-				cmdout = %x{gluster volume replace-brick #{resource[:name]} #{brick_old} #{brick_new} start}
+				Puppet.debug "Glusterfs_volume: Executing `gluster volume replace-brick #{resource[:name]} '#{brick_old}' '#{brick_new}' start`"
+				cmdout = %x{gluster volume replace-brick #{resource[:name]} '#{brick_old}' '#{brick_new}' start}
 				cmdstatus = $?
 
 				if cmdstatus != 0 then
@@ -248,8 +249,8 @@ Puppet::Type.type(:glusterfs_volume).provide(:gluster) do
 		if resource[:remove_bricks] == :true
 			if bricks_extra.length > 0 then
 				#TODO don't remove bricks if a rebalance is in progress
-				Puppet.debug "Glusterfs_volume: Executing `echo y | gluster volume remove-brick #{resource[:name]} #{bricks_extra.join(' ')}`"
-				cmdout = %x{echo y | gluster volume remove-brick #{resource[:name]} #{bricks_extra.join(' ')} 2>&1}
+				Puppet.debug "Glusterfs_volume: Executing `echo y | gluster volume remove-brick #{resource[:name]} '#{bricks_extra.join("' '")}'`"
+				cmdout = %x{echo y | gluster volume remove-brick #{resource[:name]} '#{bricks_extra.join("' '")}' 2>&1}
 				cmdstatus = $?
 
 				if cmdstatus != 0 then
@@ -262,6 +263,7 @@ Puppet::Type.type(:glusterfs_volume).provide(:gluster) do
 		end
 
 		if resource[:rebalance] == :true then
+			Puppet.debug "Glusterfs_volume: Executing `gluster volume rebalance #{resource[:name]} migrate-data start`"
 			cmdout = %x{gluster volume rebalance #{resource[:name]} migrate-data start}
 			cmdstatus = $?
 
@@ -269,6 +271,7 @@ Puppet::Type.type(:glusterfs_volume).provide(:gluster) do
 				raise(Puppet::Error, "Glusterfs_volume[#{resource[:name]}]: Error deleting bricks: #{cmdout.gsub(/\n/, '; ')}")
 			end
 		else
+			Puppet.debug "Glusterfs_volume: Executing `gluster volume rebalance #{resource[:name]} fix-layout start`"
 			cmdout = %x{gluster volume rebalance #{resource[:name]} fix-layout start}
 			cmdstatus = $?
 
