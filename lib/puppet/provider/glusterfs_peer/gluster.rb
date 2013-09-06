@@ -7,7 +7,7 @@ Puppet::Type.type(:glusterfs_peer).provide(:gluster) do
 		# method B
 		peers = []
 		Puppet.debug "Glusterfs_peer: Executing `gluster peer status`"
-		%x{gluster peer status}.split(/\n/).each do |line|
+		%x{gluster peer status 2>/dev/null}.split(/\n/).each do |line|
 			if /^Hostname: (\S+)/.match(line) then
 				peers.push($1)
 			end
@@ -30,6 +30,9 @@ Puppet::Type.type(:glusterfs_peer).provide(:gluster) do
 		if !self.exists? then
 			Puppet.debug "Glusterfs_peer: Executing `gluster peer probe #{resource[:host]}`"
 			system("gluster", "peer", "probe", resource[:host])
+			if $?.exitstatus != 0 then
+				fail("Peer probe failed for #{resource[:host]}")
+			end
 		end
 	end
 	def destroy

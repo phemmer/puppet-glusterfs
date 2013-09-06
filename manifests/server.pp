@@ -2,15 +2,18 @@ class glusterfs::server (
   $cluster_name = 'gluster', # all servers with the same $cluster_name will automatically join each other
   $address = $ipaddress, # the address other nodes will use to talk to us
   $firewall = false, # whether to configure firewall
+  $version = 'installed',
 ) {
   package { 'glusterfs-server':
-    ensure => installed,
+    ensure => $ensure,
   }
   service { 'glusterfs-server':
     ensure  => running,
     enable  => true,
     require => Package['glusterfs-server'],
   }
+  Service['glusterfs-server'] -> Glusterfs_peer <||>
+  Glusterfs_peer <||> -> Glusterfs_volume <||>
 
   # here we export ourself
   @@glusterfs::server::peer { $address:
