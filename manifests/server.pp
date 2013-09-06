@@ -4,8 +4,12 @@ class glusterfs::server (
   $firewall = false, # whether to configure firewall
   $version = 'installed',
 ) {
+  package { 'glusterfs-common':
+    ensure => $version,
+  }
   package { 'glusterfs-server':
-    ensure => $ensure,
+    ensure  => $version,
+    require => Package['glusterfs-common'],
   }
   service { 'glusterfs-server':
     ensure  => running,
