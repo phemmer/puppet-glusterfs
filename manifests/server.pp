@@ -11,6 +11,13 @@ class glusterfs::server (
     ensure  => $version,
     require => Package['glusterfs-common'],
   }
+  exec { 'kill glusterfsd':
+    provider    => 'shell',
+    command     => 'pkill "gluster(d|fsd)" || /bin/true',
+    subscribe   => Package['glusterfs-server'],
+    before      => Service['glusterfs-server'],
+    refreshonly => true,
+  }
   service { 'glusterfs-server':
     ensure  => running,
     enable  => true,
